@@ -1,27 +1,39 @@
 package src.main.java;
 
 public class Percolation {
-    // create n-by-n grid, with all sites blocked
+    public static int[][] matrix;
+    public static int numberOrOpen;
+
     public Percolation(int n) {
-
+        matrix = new int[n][n];
     }
-    // open site (row, col) if it is not open already
+
     public void open(int row, int col) {
-
+        if (row < 1 || col < 1) {
+            throw new IllegalArgumentException();
+        }
+        matrix[row-1][col-1] = 1;
+        numberOrOpen++;
     }
-    // is site (row, col) open?
+
     public boolean isOpen(int row, int col) {
-        return false;
+        if (row < 1 || col < 1) {
+            throw new IllegalArgumentException();
+        }
+        return matrix[row-1][col-1] == 1;
     }
 
     // is site (row, col) full?
     public boolean isFull(int row, int col) {
+        if (row < 1 || col < 1) {
+            throw new IllegalArgumentException();
+        }
         return false;
     }
 
     // number of open sites
     public int numberOfOpenSites() {
-        return 100;
+        return numberOrOpen;
     }
 
     // does the system percolate?
