@@ -13,7 +13,7 @@
 
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
-import src.main.java.Percolation;
+import main.java.Percolation;
 
 public class InteractivePercolationVisualizer {
 
