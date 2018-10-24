@@ -1,15 +1,12 @@
-import edu.princeton.cs.algs4.StdRandom;
-import edu.princeton.cs.algs4.StdStats;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-    public static WeightedQuickUnionUF QU;
-    public boolean[][] opened;
-    public int numberOfOpen = 2;
-
-    public int top = 0;
-    public int bottom;
-    public int size;
+    static WeightedQuickUnionUF QU;
+    boolean[][] opened;
+    int numberOfOpen = 0;
+    int top = 0;
+    int bottom;
+    int size;
 
     public Percolation(int n) {
         size = n;
@@ -85,7 +82,6 @@ public class Percolation {
         return QU.connected(bottom, top);
     }
 
-    // test client (optional)
     public static void main(String[] args) {
 
     }
