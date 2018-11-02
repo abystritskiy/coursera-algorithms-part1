@@ -1,17 +1,20 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-    static WeightedQuickUnionUF QU;
-    boolean[][] opened;
-    int numberOfOpen = 0;
-    int top = 0;
-    int bottom;
-    int size;
+    private static final int TOP = 0;
+    private final WeightedQuickUnionUF qu;
+    private final int bottom;
+    private final int size;
+    private boolean[][] opened;
+    private int numberOfOpen = 0;
 
     public Percolation(int n) {
+        if (n <= 0) {
+            throw new IllegalArgumentException();
+        }
         size = n;
-        QU = new WeightedQuickUnionUF(size * size + 2);
-        bottom = size*size + 1;
+        qu = new WeightedQuickUnionUF(size * size + 2);
+        bottom = size * size + 1;
         opened = new boolean[size][size];
     }
 
@@ -23,66 +26,69 @@ public class Percolation {
             return;
         }
 
-        opened[row-1][col-1] = true;
+        opened[row - 1][col - 1] = true;
         numberOfOpen++;
 
         int idCell = (row - 1) * size + col;
 
-        if (row  == 1) {
-            QU.union(idCell, top);
-        } else if (opened[row-2][col-1]) {
-            int idTop =  (row - 2) * size + col;
-            QU.union(idCell, idTop);
+        openCell(row, col, idCell);
+    }
+
+    private void openCell(int row, int col, int idCell) {
+        if (row == 1) {
+            qu.union(idCell, TOP);
+        } else if (opened[row - 2][col - 1]) {
+            int idTop = (row - 2) * size + col;
+            qu.union(idCell, idTop);
         }
 
-        if (row  == size) {
-            QU.union(idCell, bottom);
-        } else if (opened[row][col-1]) {
-            int idBottom =  row  * size + col;
-            QU.union(idCell, idBottom);
+        if (row == size) {
+            qu.union(idCell, bottom);
+        } else if (opened[row][col - 1]) {
+            int idBottom = row * size + col;
+            qu.union(idCell, idBottom);
         }
 
-        if (col > 1 && opened[row-1][col-2]) {
-            int idLeft =  (row - 1) * size + col - 1 ;
-            QU.union(idCell, idLeft);
+        if (col > 1 && opened[row - 1][col - 2]) {
+            int idLeft = (row - 1) * size + col - 1;
+            qu.union(idCell, idLeft);
         }
 
-        if (col < size && opened[row-1][col]) {
-            int idRight =  (row - 1) * size + col + 1;
-            QU.union(idCell, idRight);
+        if (col < size && opened[row - 1][col]) {
+            int idRight = (row - 1) * size + col + 1;
+            qu.union(idCell, idRight);
         }
 
-        if (size == 1)  {
-            QU.union(bottom, 1);
-            QU.union(top, 1);
+        if (size == 1) {
+            qu.union(bottom, 1);
+            qu.union(TOP, 1);
         }
     }
 
     public boolean isOpen(int row, int col) {
-        if (row < 1 || col < 1) {
+        if (row < 1 || col < 1 || row > size || col > size) {
             throw new IllegalArgumentException();
         }
-        return opened[row-1][col-1];
+        return opened[row - 1][col - 1];
     }
 
     public boolean isFull(int row, int col) {
-        if (row < 1 || col < 1) {
+        if (row < 1 || col < 1 || row > size || col > size) {
             throw new IllegalArgumentException();
         }
         int idCell = (row - 1) * size + col;
-        return opened[row-1][col-1] && QU.connected(top, idCell);
+        return opened[row - 1][col - 1] && qu.connected(TOP, idCell);
     }
 
     public int numberOfOpenSites() {
         return numberOfOpen;
     }
 
-
     public boolean percolates() {
-        return QU.connected(bottom, top);
+        return qu.connected(bottom, TOP);
     }
 
     public static void main(String[] args) {
-
+        // main methods - used for tests
     }
 }
