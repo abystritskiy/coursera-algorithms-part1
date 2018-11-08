@@ -1,5 +1,6 @@
 import java.util.*;
 import java.lang.*;
+
 import edu.princeton.cs.algs4.StdRandom;
 
 public class RandomizedQueue<Item> implements Iterable<Item> {
@@ -7,53 +8,50 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     private int size;
 
     public RandomizedQueue() {
-        this.size = 0;
-        this.s = (Item[]) new Object[1];
+        size = 0;
+        s = (Item[]) new Object[1];
     }
 
     public boolean isEmpty() {
-        return this.size == 0;
+        return size == 0;
     }
 
     public int size() {
-        return this.size;
+        return size;
     }
 
     public void enqueue(Item item) {
         if (item == null) {
             throw new IllegalArgumentException();
         }
-        if (this.size == this.s.length) {
-            this.resize(this.s.length * 2);
+        if (size == s.length) {
+            resize(size * 2);
         }
-        this.size++;
-        s[this.size] = item;
+        s[size++] = item;
     }
 
     public Item dequeue() {
-        if (this.isEmpty()) {
+        if (isEmpty()) {
             throw new NoSuchElementException();
         }
 
         int id = StdRandom.uniform(size);
-        Item item = this.s[id];
-        if (id != this.size-1) {
-            this.s[id] = this.s[this.size];
-            this.s[this.size] = null;
+        Item item = s[id];
+        if (id != size - 1) {
+            s[id] = s[size - 1];
+        }
+        s[--size] = null;
+
+        if (size <= s.length / 4) {
+            this.resize(s.length / 2);
         }
 
-        if (this.size < this.s.length / 4) {
-            this.resize(this.s.length / 2);
-        }
-
-        this.size--;
         return item;
     }
 
-    protected void resize(int capacity)
-    {
-        Item[] copy = (Item []) new Object[capacity];
-        for (int i = 0; i < capacity; i++) {
+    protected void resize(int capacity) {
+        Item[] copy = (Item[]) new Object[capacity];
+        for (int i = 0; i < s.length; i++) {
             copy[i] = s[i];
         }
         this.s = copy;
@@ -61,7 +59,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
 
     public Item sample() {
-        if (this.isEmpty()) {
+        if (isEmpty()) {
             throw new NoSuchElementException();
         }
         int id = StdRandom.uniform(size);
@@ -77,8 +75,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         return new DequeueIterator();
     }
 
-    private class DequeueIterator implements Iterator<Item>
-    {
+    private class DequeueIterator implements Iterator<Item> {
         private int current = 0;
 
         public boolean hasNext() {
@@ -93,8 +90,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            Item item = RandomizedQueue.this.s[this.current];
-            this.current++;
+            Item item = RandomizedQueue.this.s[current];
+            current++;
             return item;
         }
     }
