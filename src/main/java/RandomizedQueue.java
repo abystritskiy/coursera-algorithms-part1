@@ -1,5 +1,5 @@
-import java.util.*;
-import java.lang.*;
+import java.util.NoSuchElementException;
+import java.util.Iterator;
 
 import edu.princeton.cs.algs4.StdRandom;
 
@@ -25,7 +25,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             throw new IllegalArgumentException();
         }
         if (size == s.length) {
-            resize(size * 2);
+            resize(s.length * 2, s.length);
         }
         s[size++] = item;
     }
@@ -42,19 +42,17 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
         s[--size] = null;
 
-        if (size <= s.length / 4) {
-            this.resize(s.length / 2);
+        if (size >= 1 && size == s.length / 4) {
+            resize(s.length / 2, size);
         }
 
         return item;
     }
 
-    protected void resize(int capacity) {
-        Item[] copy = (Item[]) new Object[capacity];
-        for (int i = 0; i < s.length; i++) {
-            copy[i] = s[i];
-        }
-        this.s = copy;
+    private void resize(int newCapacity, int copyLength) {
+        Item[] copy = (Item[]) new Object[newCapacity];
+        System.arraycopy(s, 0, copy, 0, copyLength);
+        s = copy;
     }
 
 
@@ -71,15 +69,22 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         // unit testing (optional)
     }
 
+    @Override
     public Iterator<Item> iterator() {
-        return new DequeueIterator();
+        return new RandomizedQueueIterator();
     }
 
-    private class DequeueIterator implements Iterator<Item> {
-        private int current = 0;
+    private class RandomizedQueueIterator implements Iterator<Item> {
+        private int copySize = size;
+        private final Item[] sCopy;
+
+        private RandomizedQueueIterator() {
+            sCopy = (Item[]) new Object[copySize];
+            System.arraycopy(s, 0, sCopy, 0, size);
+        }
 
         public boolean hasNext() {
-            return this.current != RandomizedQueue.this.s.length;
+            return copySize > 0;
         }
 
         public void remove(Item item) {
@@ -90,9 +95,13 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            Item item = RandomizedQueue.this.s[current];
-            current++;
-            return item;
+            int randomIndex = StdRandom.uniform(copySize);
+            Item next = sCopy[randomIndex];
+            if (randomIndex != copySize - 1) {
+                sCopy[randomIndex] = sCopy[copySize - 1];
+            }
+            sCopy[--copySize] = null;
+            return next;
         }
     }
 

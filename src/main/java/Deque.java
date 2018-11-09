@@ -1,5 +1,5 @@
-import java.util.*;
-import java.lang.*;
+import java.util.NoSuchElementException;
+import java.util.Iterator;
 
 public class Deque<Item> implements Iterable<Item> {
     private int size;
@@ -13,59 +13,78 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     public boolean isEmpty() {
-        return this.size == 0;
+        return size <= 0;
     }
 
     public int size() {
-        return this.size;
+        return size;
     }
 
     public void addFirst(Item item) {
-        Node<Item> newFirst = new Node(item);
-        Node<Item> oldFirst = first;
-        newFirst.next = oldFirst;
+        if (item == null) {
+            throw new IllegalArgumentException();
+        }
+        Node<Item> newFirst = new Node<>(item);
+        if (first != null) {
+            Node<Item> oldFirst = first;
+            newFirst.next = oldFirst;
+            oldFirst.prev = newFirst;
+        }
         first = newFirst;
         size++;
+        if (size == 1) {
+            last = newFirst;
+        }
     }
 
     public void addLast(Item item) {
-        Node<Item> newLast = new Node(item);
-        Node<Item> oldLast = last;
-        newLast.prev = oldLast;
+        if (item == null) {
+            throw new IllegalArgumentException();
+        }
+        Node<Item> newLast = new Node<>(item);
+        if (last != null) {
+            Node<Item> oldLast = last;
+            newLast.prev = oldLast;
+            oldLast.next = newLast;
+        }
         last = newLast;
         size++;
+        if (size == 1) {
+            first = newLast;
+        }
     }
 
     public Item removeFirst() {
         if (isEmpty()) {
-            throw new java.util.NoSuchElementException();
+            throw new NoSuchElementException();
         }
-        Node<Item> first = this.first;
-        this.first = first.next;
+        Node<Item> firstNode = first;
+        first = firstNode.next;
         size--;
-        return first.item;
+        return firstNode.item;
     }
 
     public Item removeLast() {
         if (isEmpty()) {
-            throw new java.util.NoSuchElementException();
+            throw new NoSuchElementException();
         }
-        Node<Item> last = this.last;
-        this.last = last.prev;
+        Node<Item> lastNode = last;
+        last = lastNode.prev;
         size--;
-        return last.item;
+        return lastNode.item;
     }
 
+    @Override
     public Iterator<Item> iterator() {
         return new DequeueIterator();
     }
 
-    private class Node<Item> {
-        private Item item;
+    private static class Node<Item> {
+        public final Item item;
         private Node<Item> next, prev;
 
-        private Node(Item item) {
-            this.item = item;
+        private Node(Item nodeItem) {
+            item = nodeItem;
             next = null;
             prev = null;
         }
@@ -73,7 +92,7 @@ public class Deque<Item> implements Iterable<Item> {
 
 
     private class DequeueIterator implements Iterator<Item> {
-        private Node<Item> current;
+        private Node<Item> current = first;
 
         public boolean hasNext() {
             return current != null;
@@ -84,9 +103,9 @@ public class Deque<Item> implements Iterable<Item> {
                 throw new NoSuchElementException();
             }
 
-            Node<Item> oldCurrent = this.current;
-            current = oldCurrent.next;
-            return oldCurrent.item;
+            Item item = current.item;
+            current = current.next;
+            return item;
         }
 
         public void remove(Item item) {
