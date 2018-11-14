@@ -3,22 +3,20 @@ import java.util.Arrays;
 
 public class FastCollinearPoints {
     private final ArrayList<ArrayList<Point>> segmentsList = new ArrayList<>();
+    private final LineSegment[] segments;
 
     public FastCollinearPoints(Point[] points) {
         if (points == null) throw new java.lang.IllegalArgumentException();
-        Point[] pointsCopy = points.clone();
-        Arrays.sort(pointsCopy);
-        if (pointsCopy.length > 1) {
-            for (int i = 1; i < pointsCopy.length; i++) {
-                if (points[i] == null || points[i - 1] == null || pointsCopy[i].slopeTo(pointsCopy[i - 1]) == Double.NEGATIVE_INFINITY) {
-                    throw new java.lang.IllegalArgumentException();
-                }
-            }
-        }
+        checkNull(points);
+        checkDuplicates(points);
+
+        Point[] pointsCopy = new Point[points.length];
+        System.arraycopy(points, 0, pointsCopy, 0, points.length);
 
         for (Point point : pointsCopy) {
-            ArrayList<Point> listOfPoints = new ArrayList<>(Arrays.asList(pointsCopy));
-            listOfPoints.sort(point.slopeOrder());
+            Point[] sortedPoints = new Point[pointsCopy.length];
+            System.arraycopy(pointsCopy, 0, sortedPoints, 0, sortedPoints.length);
+            Arrays.sort(sortedPoints, point.slopeOrder());
 
             double prevSlope = Double.NEGATIVE_INFINITY;
 
@@ -26,16 +24,15 @@ public class FastCollinearPoints {
             Point maxPoint = point;
             int pointsNum = 1;
 
-            for (int j = 0; j < listOfPoints.size(); j++) {
-                Point subPoint = listOfPoints.get(j);
+            for (int j = 1; j < sortedPoints.length; j++) {
+                Point subPoint = sortedPoints[j];
+
                 if (subPoint == point) continue;
 
                 double slope = point.slopeTo(subPoint);
 
-                if (slopesEquals(slope, prevSlope)) {
-//                if (prevSlope == Double.NEGATIVE_INFINITY || Math.abs(slope - prevSlope) < 0.000000001) {
-
-                        pointsNum++;
+                if (Double.compare(slope, prevSlope) == 0) {
+                    pointsNum++;
 
                     if (subPoint.compareTo(minPoint) < 0) {
                         minPoint = subPoint;
@@ -61,11 +58,16 @@ public class FastCollinearPoints {
                 }
                 prevSlope = slope;
 
-                if (j == pointsCopy.length - 1 && pointsNum >= 3) {
+                if (j == pointsCopy.length - 1 && pointsNum > 3) {
                     addSegment(minPoint, maxPoint);
                 }
             }
 
+        }
+
+        segments = new LineSegment[segmentsList.size()];
+        for (int i = 0; i < segmentsList.size(); i++) {
+            segments[i] = new LineSegment(segmentsList.get(i).get(0), segmentsList.get(i).get(1));
         }
     }
 
@@ -81,21 +83,38 @@ public class FastCollinearPoints {
         segmentsList.add(segmentPoints);
     }
 
+    private void checkDuplicates(Point[] points) {
+        if (points.length > 0) {
+            Point[] pointsCopy = new Point[points.length];
+            System.arraycopy(points, 0, pointsCopy, 0, points.length);
+            Arrays.sort(pointsCopy);
+            Point currentPoint = pointsCopy[0];
+            for (int i = 1; i < pointsCopy.length; i++) {
+                if (pointsCopy[i].compareTo(currentPoint) == 0) {
+                    throw new IllegalArgumentException();
+                } else {
+                    currentPoint = pointsCopy[i];
+                }
+            }
+        }
+    }
 
-    private boolean slopesEquals(double slope, double prevSlope) {
-        return prevSlope == Double.NEGATIVE_INFINITY || Math.abs(slope - prevSlope) < 0.0001 ||
-                (slope == Double.POSITIVE_INFINITY && prevSlope == Double.POSITIVE_INFINITY);
+    private void checkNull(Point[] points) {
+        for (Point p : points) {
+            if (p == null) {
+                throw new java.lang.IllegalArgumentException();
+            }
+        }
     }
 
     public int numberOfSegments() {
-        return segments().length;
+        return segments.length;
     }
 
     public LineSegment[] segments() {
-        LineSegment[] segments = new LineSegment[segmentsList.size()];
-        for (int i = 0; i < segmentsList.size(); i++) {
-            segments[i] = new LineSegment(segmentsList.get(i).get(0), segmentsList.get(i).get(1));
-        }
-        return segments.clone();
+        LineSegment[] ret = new LineSegment[segmentsList.size()];
+        System.arraycopy(segments, 0, ret, 0, segments.length);
+
+        return ret;
     }
 }

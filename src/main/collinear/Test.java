@@ -10,7 +10,7 @@ public class Test {
      */
     public static void main(String[] args) {
         // read the n points from a file
-        In in = new In("input/collinear/test2b.txt");
+        In in = new In("input/collinear/input40.txt");
         int n = in.readInt();
         Point[] points = new Point[n];
         for (int i = 0; i < n; i++) {
@@ -29,13 +29,14 @@ public class Test {
 
 
         // print and draw the line segments
-        BruteCollinearPoints collinear = new BruteCollinearPoints(points);
+       /* BruteCollinearPoints collinear = new BruteCollinearPoints(points);
         LineSegment[] segments = collinear.segments();
+        System.out.println("Size: " + collinear.numberOfSegments());
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
 //            segment.draw();
-        }
-        StdOut.println("\n\n");
+        }*/
+        StdOut.println("\n");
         FastCollinearPoints collinearFast = new FastCollinearPoints(points);
         System.out.println("Size: " + collinearFast.numberOfSegments());
         for (LineSegment segmentFast : collinearFast.segments()) {
