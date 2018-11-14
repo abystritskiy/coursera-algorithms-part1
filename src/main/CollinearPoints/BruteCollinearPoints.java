@@ -1,107 +1,85 @@
-import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.StdDraw;
-import edu.princeton.cs.algs4.StdOut;
-
-import javax.swing.text.Segment;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 
 public class BruteCollinearPoints {
-    protected LineSegment[] segments;
+    private final ArrayList<ArrayList<Point>> segmentsList = new ArrayList<>();
 
     public BruteCollinearPoints(Point[] points) {
-        // finds all line segments containing 4 or more points
-        // p→q→r→s
-        // slope(p,q) == slope(p,r) == slope(p,s)
         if (points == null) throw new java.lang.IllegalArgumentException();
-        HashMap<String, LineSegment> segmentsMap = new HashMap<>();
 
+        Point[] pointsCopy = points.clone();
+        Arrays.sort(pointsCopy);
+        if (pointsCopy.length > 1) {
+            for (int i = 1; i < pointsCopy.length; i++) {
+                if (points[i] == null || points[i-1] == null || pointsCopy[i].slopeTo(pointsCopy[i - 1]) == Double.NEGATIVE_INFINITY) {
+                    throw new java.lang.IllegalArgumentException();
+                }
+            }
+        }
 
-        for (int i = 0; i < points.length; i++) {
-            if (points[i] == null) {
+        for (int i = 0; i < pointsCopy.length - 3; i++) {
+            if (pointsCopy[i] == null) {
                 throw new java.lang.IllegalArgumentException();
             }
-            Point p = points[i];
-            for (int j = 0; j < points.length; j++) {
+            Point p = pointsCopy[i];
+            for (int j = i + 1; j < pointsCopy.length - 2; j++) {
                 if (j == i) continue;
-                Point q = points[j];
+                Point q = pointsCopy[j];
                 double pq = p.slopeTo(q);
-                for (int k = 0; k < points.length; k++) {
+                for (int k = j; k < pointsCopy.length - 1; k++) {
                     if (k == j || k == i) continue;
-                    Point r = points[k];
+                    Point r = pointsCopy[k];
                     double pr = p.slopeTo(r);
-                    for (int l = 0; l < points.length; l++) {
-                        if (l == k || l == j || k == i) continue;
-                        Point s = points[l];
-                        double ps = p.slopeTo(s);
-                        if (pq != pr && pq != ps) continue;
 
-                        //slope must start with lowest - ends with higest
-                        Point[] segmentPoints = new Point[] {p, q, r, s};
+                    if (Math.abs(pq - pr) < 0.0001) continue;
+
+                    for (int m = k + 1; m < pointsCopy.length; m++) {
+                        if (m == k || m == j || m == i) continue;
+                        Point s = pointsCopy[m];
+                        double ps = p.slopeTo(s);
+
+                        if (Math.abs(pq-ps) < 0.0001) continue;
+
+                        Point[] segmentPoints = new Point[]{p, q, r, s};
 
                         Point min = segmentPoints[0];
                         Point max = segmentPoints[0];
-                        for (Point point: points) {
+                        for (Point point : segmentPoints) {
                             if (point.compareTo(min) < 0) {
                                 min = point;
                             } else if (point.compareTo(max) > 0) {
                                 max = point;
                             }
                         }
-                        LineSegment segment = new LineSegment(min, max);
-                        if (!segmentsMap.containsKey(segment.toString())) {
-                            segmentsMap.put(segment.toString(), segment);
-                        }
+                        addSegment(min, max);
                     }
                 }
             }
         }
-        segments = new LineSegment[segmentsMap.size()];
-        int x = 0;
-        for (LineSegment lineSegment: segmentsMap.values()) {
-            segments[x++] = lineSegment;
-        }
     }
 
+    private void addSegment(Point minPoint, Point maxPoint) {
+        for (ArrayList<Point> el : segmentsList) {
+            if (el.get(0) == minPoint && el.get(1) == maxPoint) {
+                return;
+            }
+        }
+        ArrayList<Point> segmentPoints = new ArrayList<>();
+        segmentPoints.add(minPoint);
+        segmentPoints.add(maxPoint);
+        segmentsList.add(segmentPoints);
+    }
 
     public int numberOfSegments() {
-        return segments.length;
+        return segments().length;
     }
 
     public LineSegment[] segments() {
-        return segments;
+        LineSegment[] segments = new LineSegment[segmentsList.size()];
+        for (int i = 0; i < segmentsList.size(); i++) {
+            segments[i] = new LineSegment(segmentsList.get(i).get(0), segmentsList.get(i).get(1));
+        }
+        return segments.clone();
     }
 
-    /**
-     * @todo - remove before submission
-     * @param args
-     */
-    public static void main (String[] args) {
-        // read the n points from a file
-        In in = new In("input/collinear/input6.txt");
-        int n = in.readInt();
-        Point[] points = new Point[n];
-        for (int i = 0; i < n; i++) {
-            int x = in.readInt();
-            int y = in.readInt();
-            points[i] = new Point(x, y);
-        }
-
-        // draw the points
-        StdDraw.enableDoubleBuffering();
-        StdDraw.setXscale(0, 32768);
-        StdDraw.setYscale(0, 32768);
-        for (Point p : points) {
-            p.draw();
-        }
-        StdDraw.show();
-
-        // print and draw the line segments
-        BruteCollinearPoints collinear = new BruteCollinearPoints(points);
-        for (LineSegment segment : collinear.segments()) {
-            StdOut.println(segment);
-            segment.draw();
-        }
-        StdDraw.show();
-    }
 }
