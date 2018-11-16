@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public class Board {
                 }
             }
         }
-        return hamming;
+        return hamming+move;
     }
 
     public int manhattan() {
@@ -56,7 +55,7 @@ public class Board {
                 manhattan+= Math.abs(i-y) + Math.abs(j-x);
             }
         }
-        return manhattan;
+        return manhattan+move;
     }
 
     public boolean isGoal() {
