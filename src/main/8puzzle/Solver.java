@@ -12,7 +12,10 @@ public class Solver {
     }
     public int moves()  {
         // min number of moves to solve initial board; -1 if unsolvable
-        return 0;
+        if (isSolvable()) {
+
+        }
+        return -1;
     }
     /*public Iterable<Board> solution() {
         // sequence of boards in a shortest solution; null if unsolvable

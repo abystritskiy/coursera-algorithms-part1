@@ -11,10 +11,9 @@ public class PuzzleTest {
                 blocks[i][j] = in.readInt();
         Board initial = new Board(blocks);
 
-        System.out.println(initial.hamming());
-        System.out.println(initial.manhattan());
-        System.out.println(initial.isGoal());
-
+        for (Board neigbour: initial.neighbors()) {
+            System.out.println(neigbour.toString());
+        }
         // solve the puzzle
         /*Solver solver = new Solver(initial);
 
