@@ -10,11 +10,11 @@ public class Solver {
             throw new java.lang.IllegalArgumentException();
         }
         MinPQ<SearchBoard> minPQ = new MinPQ<>();
-        SearchBoard initialSearchBoard = new SearchBoard(initial, null, 0);
+        SearchBoard initialSearchBoard = new SearchBoard(initial, null);
         minPQ.insert(initialSearchBoard);
 
         MinPQ<SearchBoard> minPQTwin = new MinPQ<>();
-        SearchBoard twinSearchBoard = new SearchBoard(initial.twin(), null, 0);
+        SearchBoard twinSearchBoard = new SearchBoard(initial.twin(), null);
         minPQTwin.insert(twinSearchBoard);
 
 
@@ -36,14 +36,14 @@ public class Solver {
 
             for (Board neighbour : currentSB.getBoard().neighbors()) {
                 if (currentSB.getPredecessor() == null || !currentSB.getBoard().equals(neighbour)) {
-                    SearchBoard child = new SearchBoard(neighbour, currentSB, currentSB.getMove() + 1);
+                    SearchBoard child = new SearchBoard(neighbour, currentSB);
                     minPQ.insert(child);
                 }
             }
 
             for (Board neighbourTwin : currentTwinSB.getBoard().neighbors()) {
                 if (currentTwinSB.getPredecessor() == null || !currentTwinSB.getBoard().equals(neighbourTwin)) {
-                    SearchBoard child = new SearchBoard(neighbourTwin, currentSB, currentTwinSB.getMove() + 1);
+                    SearchBoard child = new SearchBoard(neighbourTwin, currentTwinSB);
                     minPQTwin.insert(child);
                 }
             }
@@ -62,7 +62,7 @@ public class Solver {
     }
 
     public Iterable<Board> solution() {
-        if (this.isSolvable()) {
+        if (isSolvable()) {
             Stack<Board> solutionsStack = new Stack<>();
             SearchBoard current = last;
             while (current != null) {
@@ -83,10 +83,15 @@ public class Solver {
         private final Board board;
         private final int move;
 
-        private SearchBoard(Board board, SearchBoard predecessor, int move) {
+        private SearchBoard(Board board, SearchBoard predecessor) {
             this.board = board;
             this.predecessor = predecessor;
-            this.move = move;
+            if (predecessor == null) {
+                this.move = 0;
+            } else {
+                this.move = predecessor.move+1;
+            }
+
         }
 
         private int getMove() {

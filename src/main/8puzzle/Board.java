@@ -5,14 +5,18 @@ public class Board {
 
     private int emptyRow;
     private int emptyCol;
+    private final int n;
+    private final int hammingScore;
+    private final int manhattanScore;
 
     public Board(int[][] blocks) {
         if (blocks == null) {
             throw new java.lang.IllegalArgumentException();
         }
-        board = new int[blocks.length][blocks.length];
-        for (int i = 0; i < blocks.length; i++) {
-            for (int j = 0; j < blocks.length; j++) {
+        n = blocks.length;
+        board = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
                 if (blocks[i][j] == 0) {
                     emptyRow = i;
                     emptyCol = j;
@@ -20,42 +24,69 @@ public class Board {
                 board[i][j] = blocks[i][j];
             }
         }
+        hammingScore = calculateHammingScore();
+        manhattanScore = calculateManhattanScore();
+    }
+
+    private Board(int[][] blocks, int hammingScore, int manhattanScore) {
+        if (blocks == null) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        n = blocks.length;
+        board = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (blocks[i][j] == 0) {
+                    emptyRow = i;
+                    emptyCol = j;
+                }
+                board[i][j] = blocks[i][j];
+            }
+        }
+        this.hammingScore = hammingScore;
+        this.manhattanScore = manhattanScore;
     }
 
     public int dimension() {
-        return board.length;
+        return n;
     }
 
 
     public int hamming() {
-        int hScore = 0;
-        int n = dimension();
+        return hammingScore;
+    }
+
+    public int manhattan() {
+        return manhattanScore;
+    }
+
+    private int calculateHammingScore() {
+        int hammingScore = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 int cell = board[j][i];
                 int expected = (n * j + i + 1 == n * n ? 0 : n * j + i + 1);
                 if (cell != 0 && cell != expected) {
-                    hScore++;
+                    hammingScore++;
                 }
             }
         }
-
-        return hScore;
+        return hammingScore;
     }
 
-    public int manhattan() {
-        int mScore = 0;
+    private int calculateManhattanScore() {
+        int manhattanScore = 0;
         int n = dimension();
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                int cell = board[i][j];
+                int cell = board[i][j]-1;
                 if (cell != 0) {
-                    mScore += Math.abs((cell - 1) / n - i) + Math.abs((cell - 1) % n - j);
+                    manhattanScore += Math.abs(cell / n - i) + Math.abs(cell % n - j);
                 }
 
             }
         }
-        return mScore;
+        return manhattanScore;
     }
 
     public boolean isGoal() {
@@ -65,7 +96,7 @@ public class Board {
     public Board twin() {
         int[][] copyBlocks = new int[dimension()][dimension()];
 
-        for (int i = 0; i < dimension(); i++) {
+        for (int i = 0; i < n; i++) {
             System.arraycopy(board[i], 0, copyBlocks[i], 0, board[i].length);
         }
 
@@ -138,6 +169,12 @@ public class Board {
         int x0 = emptyCol;
         int y0 = emptyRow;
         ResizingArrayQueue<Board> queue = new ResizingArrayQueue<>();
+
+
+        int cell0 = board[y0][x0];
+        int expected0 = (n * y0 + x0 + 1 == n * n ? 0 : n * y0 + x0 + 1);
+        int oldZeroCellHamming = (cell0 == expected0 ? 1 : 0) ;
+
         if (x0 != 0) {
             int[][] blocksZeroLeft = getBlocksCopyWithSwitch(x0, y0, x0 - 1, y0);
             Board zeroLeft = new Board(blocksZeroLeft);
