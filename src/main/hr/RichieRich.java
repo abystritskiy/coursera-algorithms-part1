@@ -13,37 +13,16 @@ public class RichieRich {
 
     // Complete the highestValuePalindrome function below.
     static String highestValuePalindrome(String s, int n, int k) {
-
-
-        int subs = 0;
-
-        int REDIX=10;
-        char[] sChrOrig = s.toCharArray();
-        char[] sChr = new char[n];
-
-        System.arraycopy(sChrOrig, 0, sChr, 0, n);
-
         Palindrom palindrom = new Palindrom(s);
-
-        return String.valueOf(sChr);
-    }
-
-    protected static String convertToPalindrom(String S) {
-        int n = 0;
-        for (int i=0; i <= S.length()-1-i; i++) {
-            if (S.charAt(i) != S.charAt(S.length()-1-i)) {
-                n++;
-            }
-        }
-
-        return "";
+        String enlarged = palindrom.enlarge(k);
+        return enlarged;
     }
 
     private static class Palindrom {
         private final String original;
-        private final String palindrom;
+        private final String palindromSimple;
         private int subsToPalindrome;
-        private int numberOfNine;
+        private int numberOfNines;
 
         public Palindrom(String original)  {
             this.original = original;
@@ -55,32 +34,65 @@ public class RichieRich {
             int i = 0;
             int j = sChar.length - 1;
 
-
             while (i < j) {
-                j = sChar.length - 1 - i;
                 if (sChar[i] != sChar[j]) {
 
                     int left = Character.getNumericValue(sChar[i]);
                     int right = Character.getNumericValue(sChar[j]);
-                    int maxOfIJ = Math.max(left, right);
+                    int maxOfLeftRight = Math.max(left, right);
 
-                    if (maxOfIJ == 9) {
+                    if (maxOfLeftRight == 9) {
                         n9++;
                     }
 
-                    sChar[i] = Character.forDigit(maxOfIJ, 10);
-                    sChar[j] = Character.forDigit(maxOfIJ, 10);
+                    sChar[i] = Character.forDigit(maxOfLeftRight, 10);
+                    sChar[j] = Character.forDigit(maxOfLeftRight, 10);
                     n++;
                 }
+                i++;
+                j--;
             }
 
             this.subsToPalindrome = n;
-            this.numberOfNine = n9;
-            this.palindrom = String.valueOf(sChar);
+            this.numberOfNines = n9;
+            this.palindromSimple = String.valueOf(sChar);
         }
 
-    }
+        public String enlarge(int k) {
+            if (k < subsToPalindrome) {
+                return "-1";
+            }
+            int remainder = k - subsToPalindrome;
 
+            char[] sChar = palindromSimple.toCharArray();
+            char[] sCharOriginal = original.toCharArray();
+
+            int i = 0;
+            int j = sChar.length - 1;
+
+            while (remainder > 0 && i <= j) {
+                int left = Character.getNumericValue(sCharOriginal[i]);
+                int right = Character.getNumericValue(sCharOriginal[j]);
+                if (left != right && left != 9 && right != 9) {
+                    sChar[i] = '9';
+                    sChar[j] = '9';
+                    remainder--;
+                } else if (left == right && left != 9) {
+                    if (remainder >= 2) {
+                        sChar[i] = '9';
+                        sChar[j] = '9';
+                        remainder -= 2;
+                    }
+                }
+                i++;
+                j--;
+            }
+            if (remainder > 0) {
+                sChar[(sChar.length + 1) / 2 - 1] = '9';
+            }
+            return String.valueOf(sChar);
+        }
+    }
 
     public static void main(String[] args) throws IOException {
         In in = new In("input/hr/richierich/input32.txt");
@@ -92,7 +104,10 @@ public class RichieRich {
 
         String s = in.readLine();
 
+
+        System.out.println(s);
         String result = highestValuePalindrome(s, n, k);
+        System.out.println(result);
 
         Out out = new Out("input/hr/richierich/output32.txt");
         out.print(result);
