@@ -6,8 +6,8 @@ import edu.princeton.cs.algs4.SET;
 import java.util.ArrayList;
 
 public class PointSET {
-    private SET<Point2D> set;
-    private Draw draw = new Draw();
+    private final SET<Point2D> set;
+    private final Draw draw = new Draw();
 
     public PointSET() {
         set = new SET<>();
@@ -47,11 +47,11 @@ public class PointSET {
     }
 
     public Point2D nearest(Point2D p) {
-        Double dist = null;
+        double dist = -1;
         Point2D nearest = null;
         for (Point2D pSet : set) {
-            Double distToPoint = p.distanceTo(pSet);
-            if (dist == null || distToPoint < dist) {
+            double distToPoint = p.distanceSquaredTo(pSet);
+            if (dist == -1 || distToPoint < dist) {
                 dist = distToPoint;
                 nearest = pSet;
             }

@@ -6,7 +6,7 @@ import edu.princeton.cs.algs4.ResizingArrayQueue;
 import java.util.ArrayList;
 
 public class KdTree {
-    private Draw draw;
+    private final Draw draw;
     private Node root;
     private int size;
 
@@ -32,18 +32,18 @@ public class KdTree {
         } else {
             Node next = root;
             while (next != null) {
-                if (next.axis == "x") {
+                if (next.axis.equals("x")) {
                     if (p.x() > next.point.x()) {
                         if (next.right == null) {
                             insertRight(next, p);
-                            return;
+                            next = null;
                         } else {
                             next = next.right;
                         }
                     } else {
                         if (next.left == null) {
                             insertLeft(next, p);
-                            return;
+                            next = null;
                         } else {
                             next = next.left;
                         }
@@ -52,14 +52,14 @@ public class KdTree {
                     if (p.y() > next.point.y()) {
                         if (next.right == null) {
                             insertRight(next, p);
-                            return;
+                            next = null;
                         } else {
                             next = next.right;
                         }
                     } else {
                         if (next.left == null) {
                             insertLeft(next, p);
-                            return;
+                            next = null;
                         } else {
                             next = next.left;
                         }
@@ -70,16 +70,16 @@ public class KdTree {
         size++;
     }
 
-    private void insertRight(Node root, Point2D child) {
-        String newPointAxis = (root.axis == "x" ? "y" : "x");
+    private void insertRight(Node parent, Point2D child) {
+        String newPointAxis = (parent.axis.equals("x") ? "y" : "x");
         Node newPoint = new Node(child, newPointAxis);
-        root.right = newPoint;
+        parent.right = newPoint;
     }
 
-    private void insertLeft(Node root, Point2D child) {
-        String newPointAxis = (root.axis == "x" ? "y" : "x");
+    private void insertLeft(Node parent, Point2D child) {
+        String newPointAxis = (parent.axis.equals("x") ? "y" : "x");
         Node newPoint = new Node(child, newPointAxis);
-        root.left = newPoint;
+        parent.left = newPoint;
     }
 
     public boolean contains(Point2D p) {
@@ -93,7 +93,7 @@ public class KdTree {
             if (next.point.equals(p)) {
                 return true;
             }
-            if (next.axis == "x") {
+            if (next.axis.equals("x")) {
                 if (p.x() > next.point.x()) {
                     next = next.right;
                 } else {
@@ -145,7 +145,7 @@ public class KdTree {
             if (rect.contains(point)) {
                 range.add(point);
             }
-            if (node.axis == "x") {
+            if (node.axis.equals("x")) {
                 if (rect.xmin() <= point.x() && node.left != null) {
                     stack.push(node.left);
                 } else if (rect.xmax() >= point.x() && node.right != null) {
@@ -172,7 +172,7 @@ public class KdTree {
         ResizingArrayQueue<Node> queue = new ResizingArrayQueue<>();
 
         Node closestNode = root;
-        double minDistance = p.distanceTo(root.point);
+        double minDistance = p.distanceSquaredTo(root.point);
         queue.enqueue(closestNode);
 
         while (!queue.isEmpty()) {
@@ -180,13 +180,13 @@ public class KdTree {
             Node leftNode = node.left;
             Node rightNode = node.right;
 
-            if (leftNode != null &&  p.distanceTo(leftNode.point) <= minDistance) {
+            if (leftNode != null &&  p.distanceSquaredTo(leftNode.point) <= minDistance) {
                 closestNode = leftNode;
-                minDistance = p.distanceTo(leftNode.point);
+                minDistance = p.distanceSquaredTo(leftNode.point);
                 queue.enqueue(leftNode);
-            } else if (leftNode != null &&  p.distanceTo(leftNode.point) < minDistance) {
+            } else if (leftNode != null &&  p.distanceSquaredTo(leftNode.point) < minDistance) {
                 closestNode = rightNode;
-                minDistance = p.distanceTo(rightNode.point);
+                minDistance = p.distanceSquaredTo(rightNode.point);
                 queue.enqueue(leftNode);
             }
         }
@@ -202,13 +202,12 @@ public class KdTree {
         Point2D point;
         String axis;
 
-        Node left;
-        Node right;
+        Node left = null;
+        Node right = null;
 
         public Node(Point2D point, String axis) {
             this.point = point;
             this.axis = axis;
-            this.left = this.right = null;
         }
 
     }
