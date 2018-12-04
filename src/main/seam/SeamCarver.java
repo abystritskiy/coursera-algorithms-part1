@@ -106,10 +106,16 @@ public class SeamCarver {
 
     public int[] findHorizontalSeam() {
         int[] hSeam = new int[width()];
+        if (width() == 1) {
+            for (int i=0; i<width(); i++) {
+                hSeam[i] = i;
+            }
+            return hSeam;
+        }
         int firstID = width() * height();
         int lastID = width() * height() + 1;
 
-        DijkstraSP sp = new DijkstraSP(graphH, firstID);
+        SP sp = new SP(graphH, firstID);
         int x = 0;
         for (Edge edge : sp.pathTo(lastID)) {
             int edgeId = edge.to();
@@ -124,11 +130,18 @@ public class SeamCarver {
     }
 
     public int[] findVerticalSeam() {
+
         int[] vSeam = new int[height()];
+        if (height() == 1) {
+            for (int i=0; i<height(); i++) {
+                vSeam[i] = i;
+            }
+            return vSeam;
+        }
         int firstID = width() * height();
         int lastID = width() * height() + 1;
 
-        DijkstraSP sp = new DijkstraSP(graphV, firstID);
+        SP sp = new SP(graphV, firstID);
 
         int y = 0;
         for (Edge edge : sp.pathTo(lastID)) {
@@ -203,15 +216,14 @@ public class SeamCarver {
             return E;
         }
 
-        public void addEdge(Edge e)
-        {
+        public void addEdge(Edge e) {
             int v = e.from();
             adj[v].add(e);
             E++;
         }
 
-        public Iterable<DirectedEdge> edges() {
-            Bag<Edge> list = new Bag<Edge>();
+        public Iterable<Edge> edges() {
+            Bag<Edge> list = new Bag<>();
             for (int v = 0; v < V; v++) {
                 for (Edge e : adj(v)) {
                     list.add(e);
@@ -220,18 +232,17 @@ public class SeamCarver {
             return list;
         }
 
-        public Iterable<DirectedEdge> adj(int v) {
+        public Iterable<Edge> adj(int v) {
             return adj[v];
         }
 
-        public String toString()
-        {
+        public String toString() {
             StringBuilder s = new StringBuilder();
             s.append(V + " " + E + "\n");
             for (int v = 0; v < V; v++) {
                 s.append(v + ": ");
-                for (int e : adj[v]) {
-                    s.append(v + "->" + e);
+                for (Edge e : adj[v]) {
+                    s.append(e + "  ");
                 }
                 s.append("\n");
             }
@@ -239,8 +250,7 @@ public class SeamCarver {
         }
     }
 
-    private class Edge implements Comparable<Edge>
-    {
+    private class Edge implements Comparable<Edge> {
         private final int v, w;
         private final double weight;
 
@@ -268,41 +278,78 @@ public class SeamCarver {
             }
         }
 
+        public double weight() {
+            return weight;
+        }
+
         public String toString() {
             return v + "->" + w + " " + String.format("%5.2f", weight);
         }
     }
 
 
-
-    public class SP {
+    private class SP {
         private double[] distTo;
-        private DirectedEdge[] edgeTo;
+        private Edge[] edgeTo;
         private IndexMinPQ<Double> pq;
 
-        public SP(EdgeWeightedDigraph G, int s) {
+        public SP(Graph G, int s) {
             for (Edge e : G.edges()) {
-                if (e.weight() < 0)
-                    throw new IllegalArgumentException("edge " + e + " has negative weight");
+                if (e.weight() < 0) {
+                    throw new IllegalArgumentException();
+                }
             }
 
             distTo = new double[G.V()];
-            edgeTo = new DirectedEdge[G.V()];
+            edgeTo = new Edge[G.V()];
 
-            validateVertex(s);
-
-            for (int v = 0; v < G.V(); v++)
+            for (int v = 0; v < G.V(); v++) {
                 distTo[v] = Double.POSITIVE_INFINITY;
+            }
+
             distTo[s] = 0.0;
 
-            // relax vertices in order of distance from s
             pq = new IndexMinPQ<Double>(G.V());
             pq.insert(s, distTo[s]);
             while (!pq.isEmpty()) {
                 int v = pq.delMin();
-                for (DirectedEdge e : G.adj(v))
+                for (Edge e : G.adj(v)) {
                     relax(e);
+                }
             }
+        }
+
+        private void relax(Edge e) {
+            int v = e.from(), w = e.to();
+            if (distTo[w] > distTo[v] + e.weight()) {
+                distTo[w] = distTo[v] + e.weight();
+                edgeTo[w] = e;
+                if (pq.contains(w)) {
+                    pq.decreaseKey(w, distTo[w]);
+                } else {
+                    pq.insert(w, distTo[w]);
+                }
+            }
+        }
+
+        public double distTo(int v) {
+            return distTo[v];
+        }
+
+        public boolean hasPathTo(int v) {
+            return distTo[v] < Double.POSITIVE_INFINITY;
+        }
+
+        public Iterable<Edge> pathTo(int v) {
+            if (!hasPathTo(v)) {
+                return null;
+            }
+            ;
+            Stack<Edge> path = new Stack<>();
+            for (Edge e = edgeTo[v]; e != null; e = edgeTo[e.from()]) {
+                path.push(e);
+            }
+            return path;
         }
     }
 }
