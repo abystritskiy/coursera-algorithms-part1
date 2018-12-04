@@ -21,7 +21,6 @@ public class ShowSeams {
         overlay.show();
     }
 
-
     private static void showVerticalSeam(SeamCarver sc) {
         Picture picture = SCUtility.toEnergyPicture(sc);
         int[] verticalSeam = sc.findVerticalSeam();
@@ -30,11 +29,11 @@ public class ShowSeams {
     }
 
     public static void main(String[] args) {
-        Picture picture = new Picture(args[0]);
+        Picture picture = new Picture("input/seam/chameleon.png");
         StdOut.printf("image is %d columns by %d rows\n", picture.width(), picture.height());
-        picture.show();        
+        picture.show();
         SeamCarver sc = new SeamCarver(picture);
-        
+
         StdOut.printf("Displaying horizontal seam calculated.\n");
         showHorizontalSeam(sc);
 
