@@ -29,16 +29,19 @@ public class ShowSeams {
     }
 
     public static void main(String[] args) {
-        Picture picture = new Picture("input/seam/chameleon.png");
+        Picture picture = new Picture("input/seam/5x6.png");
         StdOut.printf("image is %d columns by %d rows\n", picture.width(), picture.height());
-        picture.show();
+
+
+//        picture.show();
         SeamCarver sc = new SeamCarver(picture);
+        System.out.println(sc.energy(1, 1));
 
-        StdOut.printf("Displaying horizontal seam calculated.\n");
-        showHorizontalSeam(sc);
-
-        StdOut.printf("Displaying vertical seam calculated.\n");
-        showVerticalSeam(sc);
+//        StdOut.printf("Displaying horizontal seam calculated.\n");
+//        showHorizontalSeam(sc);
+//
+//        StdOut.printf("Displaying vertical seam calculated.\n");
+//        showVerticalSeam(sc);
 
     }
 

@@ -9,6 +9,8 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/8puzzle" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/kdtree" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/wordnet" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/lc" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/seam" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

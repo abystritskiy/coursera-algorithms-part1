@@ -7,14 +7,11 @@ public class SeamCarver {
     private static final double MAX_ENERGY = 1000;
     private Picture picture;
 
-    private double[] energies;
-
     public SeamCarver(Picture picture) {
         if (picture == null) {
             throw new java.lang.IllegalArgumentException();
         }
-        this.picture = picture;
-        energies = new double[height() * width()];
+        this.picture = new Picture(picture);
     }
 
     public Picture picture() {
@@ -36,26 +33,19 @@ public class SeamCarver {
         if (x == 0 || y == 0 || x == width() - 1 || y == height() - 1) {
             return MAX_ENERGY;
         }
-        int index = y * width() + x;
-        if (energies[index] != 0) {
-            return energies[index];
-        } else {
-            Color pL = picture.get(x - 1, y);
-            Color pR = picture.get(x + 1, y);
-            Color pT = picture.get(x, y - 1);
-            Color pB = picture.get(x, y + 1);
+        Color pL = picture.get(x - 1, y);
+        Color pR = picture.get(x + 1, y);
+        Color pT = picture.get(x, y - 1);
+        Color pB = picture.get(x, y + 1);
 
-            double energy = Math.sqrt(
-                    Math.pow(pL.getRed() - pR.getRed(), 2) +
-                            Math.pow(pL.getGreen() - pR.getGreen(), 2) +
-                            Math.pow(pL.getBlue() - pR.getBlue(), 2) +
-                            Math.pow(pT.getRed() - pB.getRed(), 2) +
-                            Math.pow(pT.getGreen() - pB.getGreen(), 2) +
-                            Math.pow(pT.getBlue() - pB.getBlue(), 2)
-            );
-            energies[index] = energy;
-            return energy;
-        }
+        return Math.sqrt(
+            Math.pow(pR.getRed() - pL.getRed(), 2) +
+            Math.pow(pR.getGreen() - pL.getGreen(), 2) +
+            Math.pow(pR.getBlue() - pL.getBlue(), 2) +
+            Math.pow(pT.getRed() - pB.getRed(), 2) +
+            Math.pow(pT.getGreen() - pB.getGreen(), 2) +
+            Math.pow(pT.getBlue() - pB.getBlue(), 2)
+        );
 
     }
 
@@ -221,10 +211,8 @@ public class SeamCarver {
     }
 
     public void removeHorizontalSeam(int[] seam) {
-        if (picture.height() <= 1 || seam.length != width()) {
-            throw new java.lang.IllegalArgumentException();
-        }
-        validateSeam(seam, height() - 1);
+        validateHorizontalSeam(seam);
+
         Picture newPicture = new Picture(width(), height() - 1);
         for (int x = 0; x < width(); x++) {
             for (int y = 0; y < height() - 1; y++) {
@@ -238,11 +226,29 @@ public class SeamCarver {
         picture = newPicture;
     }
 
-    public void removeVerticalSeam(int[] seam) {
-        if (picture.width() <= 1 || seam.length != height()) {
+    private void validateHorizontalSeam(int[] seam) {
+        if (seam == null) {
             throw new java.lang.IllegalArgumentException();
         }
-        validateSeam(seam, width() - 1);
+        if (picture.height() <= 1) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        if (seam.length != picture.width()) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        for (int i = 0; i < seam.length; i++) {
+            int y = seam[i];
+            if (y < 0 || y >= height()) {
+                throw new java.lang.IllegalArgumentException();
+            }
+            if (i > 0 && Math.abs(y - seam[i - 1]) > 1) {
+                throw new java.lang.IllegalArgumentException();
+            }
+        }
+    }
+
+    public void removeVerticalSeam(int[] seam) {
+        validateVerticalSeam(seam);
         Picture newPicture = new Picture(width() - 1, height());
         for (int x = 0; x < width() - 1; x++) {
             for (int y = 0; y < height(); y++) {
@@ -256,16 +262,24 @@ public class SeamCarver {
         picture = newPicture;
     }
 
-    private void validateSeam(int[] seam, int max) {
-        int prev = -1;
-        for (int aSeam : seam) {
-            if (aSeam < 0 || aSeam >= max) {
-                throw new java.lang.IllegalArgumentException(String.valueOf(aSeam));
-            }
-            if (prev != -1 && Math.abs(aSeam - prev) > 1) {
+    private void validateVerticalSeam(int[] seam) {
+        if (seam == null) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        if (picture.width() <= 1) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        if (seam.length != picture.height()) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        for (int i = 0; i < seam.length; i++) {
+            int x = seam[i];
+            if (x < 0 || x >= width()) {
                 throw new java.lang.IllegalArgumentException();
             }
-            prev = aSeam;
+            if (i > 0 && Math.abs(x - seam[i - 1]) > 1) {
+                throw new java.lang.IllegalArgumentException();
+            }
         }
     }
 }
