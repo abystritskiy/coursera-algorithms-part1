@@ -97,6 +97,8 @@ public class BaseballElimination {
             }
         }
 
+        System.out.println(minCut);
+
         for (FlowEdge edge : edgesFromS) {
             if (edge.flow() < edge.capacity()) {
                 return true;
@@ -189,8 +191,8 @@ public class BaseballElimination {
     }
 
     public static void main(String[] args) {
-        BaseballElimination be = new BaseballElimination("input/baseball/teams24.txt");
-        System.out.println(be.isEliminated("Team4"));
-        System.out.println(be.certificateOfElimination("Team4"));
+        BaseballElimination be = new BaseballElimination("input/baseball/teams5.txt");
+        System.out.println(be.isEliminated("Detroit"));
+        System.out.println(be.certificateOfElimination("Detroit"));
     }
 }
