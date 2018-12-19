@@ -1,10 +1,12 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.TrieST;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class BoggleSolver
 {
     private final TrieST trie = new TrieST();
+
     public BoggleSolver(String[] dictionary) {
 
         for (int i=0; i<dictionary.length; i++) {
@@ -12,7 +14,7 @@ public class BoggleSolver
         }
         Iterable<String> list = trie.keysWithPrefix("WO");
         for (String match: list) {
-            System.out.println(match);
+//            System.out.println(match);
         }
         // Initializes the data structure using the given array of strings as the dictionary.
         // (You can assume each word in the dictionary contains only the uppercase letters A through Z.)
@@ -21,13 +23,31 @@ public class BoggleSolver
 
     public Iterable<String> getAllValidWords(BoggleBoard board) {
         // Returns the set of all valid words in the given Boggle board, as an Iterable.
-        return new ArrayList<>();
+
+        HashSet<String> set = new HashSet<>();
+        for (int y=0; y<board.rows(); y++) {
+            for (int x=0; x<board.cols(); x++) {
+//                set.add()
+                // iterate in two the depth
+            }
+        }
+        return set;
+    }
+
+    private static HashSet<String> dfs(BoggleBoard board, int row, int col, String str) {
+        return new HashSet<>();
     }
 
     public int scoreOf(String word) {
-        // Returns the score of the given word if it is in the dictionary, zero otherwise.
-        // (You can assume the word contains only the uppercase letters A through Z.)
-        return 0;
+        int score = 0;
+        for (int i=0; i<word.length(); i++) {
+            score++;
+            if (i != word.length()-1 && word.charAt(i) == 'Q' && word.charAt(i+1)=='U') {
+                i++;
+            }
+
+        }
+        return score;
     }
 
     public static void main(String[] args) {
@@ -38,6 +58,7 @@ public class BoggleSolver
             dictionary[i] = in.readLine().trim();
         }
         BoggleSolver bs = new BoggleSolver(dictionary);
+        System.out.println(bs.scoreOf("QUERY"));
 
     }
 }
