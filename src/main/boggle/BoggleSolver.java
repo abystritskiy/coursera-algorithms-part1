@@ -1,7 +1,5 @@
 import edu.princeton.cs.algs4.TrieST;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class BoggleSolver {
     private final TrieST<Integer> trie;
@@ -21,116 +19,97 @@ public class BoggleSolver {
 
         for (int y = 0; y < board.rows(); y++) {
             for (int x = 0; x < board.cols(); x++) {
-                ArrayList<Integer> from = new ArrayList<>();
                 StringBuilder str = new StringBuilder();
-                HashSet<ArrayList<Integer>> pointsUsed = new HashSet<>();
-                dfs(y, x, str, pointsUsed);
+                Cell cell = new Cell(y, x, boggleBoard.getLetter(y, x));
+                HashSet<String> cellUsed = new HashSet<>();
+                dfs(cell, str, cellUsed);
             }
         }
         return set;
     }
 
-    private void dfs(int row, int col, StringBuilder str, HashSet<ArrayList<Integer>> pointsUsed) {
-        ArrayList<Integer> pointUsed = new ArrayList<>();
-        pointUsed.add(row);
-        pointUsed.add(col);
-        pointsUsed.add(pointUsed);
-
-        String chr = String.valueOf(boggleBoard.getLetter(row, col));
-        chr = chr.equals("Q") ? "QU" : chr;
-        str.append(chr);
+    private void dfs(Cell cell, StringBuilder str, Set<String> pointsUsed) {
+        str.append(cell.val);
+        pointsUsed.add(cell.getCode());
 
         String prefix = str.toString();
-        List<List<Integer>> adj = getAdjacent(row, col, pointsUsed);
+        List<Cell> adj = getAdjacent(cell, pointsUsed);
 
         if (adj.isEmpty() || !trie.keysWithPrefix(prefix).iterator().hasNext()) {
-            if (chr.length() == 1) {
+            if (cell.val.length() == 1) {
                 str.deleteCharAt(str.length() - 1);
             } else {
                 str.delete(str.length() - 2, str.length());
             }
-            pointsUsed.remove(pointUsed);
+            pointsUsed.remove(cell.getCode());
             return;
         }
 
         if (trie.contains(str.toString()) && str.length() > 2) {
             set.add(str.toString());
         }
-        for (List<Integer> neighbour : adj) {
-            dfs(neighbour.get(0), neighbour.get(1), str, pointsUsed);
+        for (Cell neighbour : adj) {
+            dfs(neighbour, str, pointsUsed);
         }
 
-        if (chr.length() == 1) {
+        if (cell.val.length() == 1) {
             str.deleteCharAt(str.length() - 1);
         } else {
             str.delete(str.length() - 2, str.length());
         }
-        pointsUsed.remove(pointUsed);
+        pointsUsed.remove(cell.getCode());
     }
 
-    private List<List<Integer>> getAdjacent(int row, int col, HashSet<ArrayList<Integer>> from) {
-        List<List<Integer>> adj = new ArrayList<>();
+    private List<Cell> getAdjacent(Cell cell, Set<String> pointsUsed) {
+        int row = cell.row;
+        int col = cell.col;
+
+        List<Cell> adj = new ArrayList<>();
         if (col > 0) {
-            ArrayList<Integer> left = new ArrayList<>();
-            left.add(row);
-            left.add(col - 1);
-            if (!from.contains(left)) {
+            Cell left = new Cell(row, col - 1, boggleBoard.getLetter(row, col - 1));
+            if (!pointsUsed.contains(left.getCode())) {
                 adj.add(left);
             }
             if (row > 0) {
-                ArrayList<Integer> leftTop = new ArrayList<>();
-                leftTop.add(row - 1);
-                leftTop.add(col - 1);
-                if (!from.contains(leftTop)) {
+                Cell leftTop = new Cell(row - 1, col - 1, boggleBoard.getLetter(row - 1, col - 1));
+                if (!pointsUsed.contains(leftTop.getCode())) {
                     adj.add(leftTop);
                 }
             }
             if (row < boggleBoard.rows() - 1) {
-                ArrayList<Integer> leftBottom = new ArrayList<>();
-                leftBottom.add(row + 1);
-                leftBottom.add(col - 1);
-                if (!from.contains(leftBottom)) {
+                Cell leftBottom = new Cell(row + 1, col - 1, boggleBoard.getLetter(row + 1, col - 1));
+                if (!pointsUsed.contains(leftBottom.getCode())) {
                     adj.add(leftBottom);
                 }
             }
         }
         if (col < boggleBoard.cols() - 1) {
-            ArrayList<Integer> right = new ArrayList<>();
-            right.add(row);
-            right.add(col + 1);
-            if (!from.contains(right)) {
+            Cell right = new Cell(row, col + 1, boggleBoard.getLetter(row, col + 1));
+            if (!pointsUsed.contains(right.getCode())) {
                 adj.add(right);
             }
             if (row > 0) {
-                ArrayList<Integer> rightTop = new ArrayList<>();
-                rightTop.add(row - 1);
-                rightTop.add(col + 1);
-                if (!from.contains(rightTop)) {
+                Cell rightTop = new Cell(row - 1, col + 1, boggleBoard.getLetter(row - 1, col + 1));
+                if (!pointsUsed.contains(rightTop.getCode())) {
                     adj.add(rightTop);
                 }
             }
             if (row < boggleBoard.rows() - 1) {
-                ArrayList<Integer> rightBottom = new ArrayList<>();
-                rightBottom.add(row + 1);
-                rightBottom.add(col + 1);
-                if (!from.contains(rightBottom)) {
+                Cell rightBottom = new Cell(row + 1, col + 1, boggleBoard.getLetter(row + 1, col + 1));
+                if (!pointsUsed.contains(rightBottom.getCode())) {
                     adj.add(rightBottom);
                 }
             }
         }
         if (row > 0) {
-            ArrayList<Integer> top = new ArrayList<>();
-            top.add(row - 1);
-            top.add(col);
-            if (!from.contains(top)) {
+            Cell top = new Cell(row - 1, col, boggleBoard.getLetter(row - 1, col));
+            if (!pointsUsed.contains(top.getCode())) {
                 adj.add(top);
             }
         }
         if (row < boggleBoard.rows() - 1) {
-            ArrayList<Integer> bottom = new ArrayList<>();
-            bottom.add(row + 1);
-            bottom.add(col);
-            if (!from.contains(bottom)) {
+            Cell bottom = new Cell(row + 1, col, boggleBoard.getLetter(row + 1, col));
+            if (!pointsUsed.contains(bottom.getCode())) {
                 adj.add(bottom);
             }
         }
@@ -159,25 +138,21 @@ public class BoggleSolver {
 
     public static void main(String[] args) {
         // unit tests
+    }
 
-        String[] dictionary = new String[6013];
-        edu.princeton.cs.algs4.In in = new edu.princeton.cs.algs4.In(/*"input/boggle/dictionary-zingarelli2005.txt"*/);
-        for (int i = 0; i < 6013; i++) {
-            dictionary[i] = in.readLine().trim();
-        }
-        BoggleSolver bs = new BoggleSolver(dictionary);
-        BoggleBoard bb = new BoggleBoard("input/boggle/board-q.txt");
+    private class Cell {
+        private final int row;
+        private final int col;
+        private final String val;
 
-
-        Iterable<String> words = bs.getAllValidWords(bb);
-        ArrayList<String> sorted = new ArrayList<>();
-        for (String word : words) {
-            sorted.add(word);
+        private Cell(int row, int col, char val) {
+            this.row = row;
+            this.col = col;
+            this.val = val == 'Q' ? "QU" : String.valueOf(val);
         }
 
-        java.util.Collections.sort(sorted);
-        for (String word : sorted) {
-            System.out.println(word);
+        private String getCode() {
+            return row + "-" + col;
         }
     }
 }
