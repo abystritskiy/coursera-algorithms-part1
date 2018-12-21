@@ -2,17 +2,16 @@ import edu.princeton.cs.algs4.TrieST;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Stack;
 import java.util.List;
 import java.util.Set;
 
 
-public class BoggleSolver {
+public class BoggleSolverRecursive {
     private final TrieST<Integer> trie;
     private BoggleBoard boggleBoard;
     private HashSet<String> set;
 
-    public BoggleSolver(String[] dictionary) {
+    public BoggleSolverRecursive(String[] dictionary) {
         trie = new TrieST<>();
         for (int i = 0; i < dictionary.length; i++) {
             trie.put(dictionary[i], i);
@@ -25,47 +24,45 @@ public class BoggleSolver {
 
         for (int y = 0; y < board.rows(); y++) {
             for (int x = 0; x < board.cols(); x++) {
+                StringBuilder str = new StringBuilder();
                 Cell cell = new Cell(y, x, boggleBoard.getLetter(y, x));
-                HashSet<String> pointsUsed = new HashSet<>();
-                Task task = new Task(cell, "", pointsUsed);
-                dfs(task);
+                HashSet<String> cellUsed = new HashSet<>();
+                dfs(cell, str, cellUsed);
             }
         }
         return set;
     }
 
-    private void dfs(Task task) {
-        Stack<Task> stack = new Stack<>();
-        stack.push(task);
+    private void dfs(Cell cell, StringBuilder str, Set<String> pointsUsed) {
+        str.append(cell.val);
+        pointsUsed.add(cell.getCode());
 
-        while (!stack.empty()) {
-            Task currentTask = stack.pop();
+        String prefix = str.toString();
+        List<Cell> adj = getAdjacent(cell, pointsUsed);
 
-            Cell cell = currentTask.cell;
-            String str = currentTask.str;
-            Set<String> pointsUsed = new HashSet<>(currentTask.pointsUsed);
-
-            StringBuilder sb = new StringBuilder(str);
-            sb.append(cell.val);
-
-            String prefix = sb.toString();
-
-            if (!trie.keysWithPrefix(prefix).iterator().hasNext()) {
-                continue;
-            }
-
-            if (trie.contains(sb.toString()) && sb.toString().length() > 2) {
-                set.add(sb.toString());
-            }
-
-            pointsUsed.add(cell.getCode());
-            List<Cell> adj = getAdjacent(cell, pointsUsed);
-
-            for (Cell neighbour : adj) {
-                Task newTask = new Task(neighbour, sb.toString(), pointsUsed);
-                stack.push(newTask);
-            }
+        if (trie.contains(str.toString()) && str.length() > 2) {
+            set.add(str.toString());
         }
+
+        if (adj.isEmpty() || !trie.keysWithPrefix(prefix).iterator().hasNext()) {
+            if (cell.val.length() == 1) {
+                str.deleteCharAt(str.length() - 1);
+            } else {
+                str.delete(str.length() - 2, str.length());
+            }
+            pointsUsed.remove(cell.getCode());
+            return;
+        }
+        for (Cell neighbour : adj) {
+            dfs(neighbour, str, pointsUsed);
+        }
+
+        if (cell.val.length() == 1) {
+            str.deleteCharAt(str.length() - 1);
+        } else {
+            str.delete(str.length() - 2, str.length());
+        }
+        pointsUsed.remove(cell.getCode());
     }
 
     private List<Cell> getAdjacent(Cell cell, Set<String> pointsUsed) {
@@ -161,18 +158,6 @@ public class BoggleSolver {
 
         private String getCode() {
             return row + "-" + col + "-" + val;
-        }
-    }
-
-    private class Task {
-        private final Cell cell;
-        private final String str;
-        private final Set<String> pointsUsed;
-
-        private Task(Cell cell, String str, Set<String> pointsUsed) {
-            this.cell = cell;
-            this.str = str;
-            this.pointsUsed = pointsUsed;
         }
     }
 }

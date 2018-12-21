@@ -11,9 +11,10 @@ public class BoggleSolverTest {
             dictionary[i] = in.readLine().trim();
         }
         BoggleSolver bs = new BoggleSolver(dictionary);
+        BoggleSolverRecursive bsR = new BoggleSolverRecursive(dictionary);
         BoggleBoard bb = new BoggleBoard("input/boggle/board-q.txt");
 
-        System.out.println(bb.toString());
+//        System.out.println(bb.toString());
 
         Iterable<String> words = bs.getAllValidWords(bb);
         ArrayList<String> sorted = new ArrayList<>();
