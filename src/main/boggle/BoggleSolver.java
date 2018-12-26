@@ -1,33 +1,36 @@
-import edu.princeton.cs.algs4.TrieST;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Stack;
 import java.util.List;
-import java.util.Set;
-
 
 public class BoggleSolver {
-    private final TrieST<Integer> trie;
+    private final Trie trie = new Trie();
     private BoggleBoard boggleBoard;
+    private Cell[][] bb;
     private HashSet<String> set;
 
     public BoggleSolver(String[] dictionary) {
-        trie = new TrieST<>();
         for (int i = 0; i < dictionary.length; i++) {
-            trie.put(dictionary[i], i);
+            trie.put(dictionary[i], String.valueOf(trie.size()));
         }
     }
 
     public Iterable<String> getAllValidWords(BoggleBoard board) {
         this.boggleBoard = board;
+        this.bb = new Cell[board.rows()][board.cols()];
+
         this.set = new HashSet<>();
+        for (int y = 0; y < board.rows(); y++) {
+            for (int x = 0; x < board.cols(); x++) {
+                bb[y][x] = new Cell(y, x, boggleBoard.getLetter(y, x));
+            }
+        }
 
         for (int y = 0; y < board.rows(); y++) {
             for (int x = 0; x < board.cols(); x++) {
-                Cell cell = new Cell(y, x, boggleBoard.getLetter(y, x));
-                HashSet<String> pointsUsed = new HashSet<>();
-                Task task = new Task(cell, "", pointsUsed);
+                ArrayList<Cell> path = new ArrayList<>();
+
+                Task task = new Task(bb[y][x], path);
                 dfs(task);
             }
         }
@@ -42,90 +45,101 @@ public class BoggleSolver {
             Task currentTask = stack.pop();
 
             Cell cell = currentTask.cell;
-            String str = currentTask.str;
-            Set<String> pointsUsed = new HashSet<>(currentTask.pointsUsed);
+            ArrayList<Cell> path = new ArrayList<>(currentTask.path);
+            path.add(cell);
 
-            StringBuilder sb = new StringBuilder(str);
-            sb.append(cell.val);
+            String prefix = buildPrefix(path);
 
-            String prefix = sb.toString();
-
-            if (!trie.keysWithPrefix(prefix).iterator().hasNext()) {
+            if (trie.prefixNode(prefix) == null) {
                 continue;
             }
 
-            if (trie.contains(sb.toString()) && sb.toString().length() > 2) {
-                set.add(sb.toString());
+            if (trie.contains(prefix) && prefix.length() > 2) {
+                set.add(prefix);
             }
 
-            pointsUsed.add(cell.getCode());
-            List<Cell> adj = getAdjacent(cell, pointsUsed);
-
+            ArrayList<Cell> adj = getAdjacent(cell, path);
             for (Cell neighbour : adj) {
-                Task newTask = new Task(neighbour, sb.toString(), pointsUsed);
+                Task newTask = new Task(neighbour, path);
                 stack.push(newTask);
             }
         }
     }
 
-    private List<Cell> getAdjacent(Cell cell, Set<String> pointsUsed) {
+    private String buildPrefix(List<Cell> path) {
+        StringBuilder str = new StringBuilder();
+        for (Cell cell : path) {
+            str.append(cell.val);
+        }
+        return str.toString();
+    }
+
+    private ArrayList<Cell> getAdjacent(Cell cell, ArrayList<Cell> path) {
         int row = cell.row;
         int col = cell.col;
 
-        List<Cell> adj = new ArrayList<>();
+        ArrayList<Cell> adj = new ArrayList<>();
         if (col > 0) {
-            Cell left = new Cell(row, col - 1, boggleBoard.getLetter(row, col - 1));
-            if (!pointsUsed.contains(left.getCode())) {
-                adj.add(left);
-            }
             if (row > 0) {
-                Cell leftTop = new Cell(row - 1, col - 1, boggleBoard.getLetter(row - 1, col - 1));
-                if (!pointsUsed.contains(leftTop.getCode())) {
+                Cell leftTop = bb[row - 1][col - 1];
+                if (!path.contains(leftTop)) {
                     adj.add(leftTop);
                 }
             }
+
+            Cell left = bb[row][col - 1];
+            if (!path.contains(left)) {
+                adj.add(left);
+            }
+
             if (row < boggleBoard.rows() - 1) {
-                Cell leftBottom = new Cell(row + 1, col - 1, boggleBoard.getLetter(row + 1, col - 1));
-                if (!pointsUsed.contains(leftBottom.getCode())) {
+                Cell leftBottom = bb[row + 1][col - 1];
+                if (!path.contains(leftBottom)) {
                     adj.add(leftBottom);
                 }
             }
         }
-        if (col < boggleBoard.cols() - 1) {
-            Cell right = new Cell(row, col + 1, boggleBoard.getLetter(row, col + 1));
-            if (!pointsUsed.contains(right.getCode())) {
-                adj.add(right);
-            }
-            if (row > 0) {
-                Cell rightTop = new Cell(row - 1, col + 1, boggleBoard.getLetter(row - 1, col + 1));
-                if (!pointsUsed.contains(rightTop.getCode())) {
-                    adj.add(rightTop);
-                }
-            }
-            if (row < boggleBoard.rows() - 1) {
-                Cell rightBottom = new Cell(row + 1, col + 1, boggleBoard.getLetter(row + 1, col + 1));
-                if (!pointsUsed.contains(rightBottom.getCode())) {
-                    adj.add(rightBottom);
-                }
-            }
-        }
-        if (row > 0) {
-            Cell top = new Cell(row - 1, col, boggleBoard.getLetter(row - 1, col));
-            if (!pointsUsed.contains(top.getCode())) {
-                adj.add(top);
-            }
-        }
+
         if (row < boggleBoard.rows() - 1) {
-            Cell bottom = new Cell(row + 1, col, boggleBoard.getLetter(row + 1, col));
-            if (!pointsUsed.contains(bottom.getCode())) {
+            Cell bottom = bb[row + 1][col];
+            if (!path.contains(bottom)) {
                 adj.add(bottom);
             }
         }
 
+        if (col < boggleBoard.cols() - 1) {
+            if (row < boggleBoard.rows() - 1) {
+                Cell rightBottom = bb[row + 1][col + 1];
+                if (!path.contains(rightBottom)) {
+                    adj.add(rightBottom);
+                }
+            }
+
+            Cell right = bb[row][col + 1];
+            if (!path.contains(right)) {
+                adj.add(right);
+            }
+
+            if (row > 0) {
+                Cell rightTop = bb[row - 1][col + 1];
+                if (!path.contains(rightTop)) {
+                    adj.add(rightTop);
+                }
+            }
+        }
+        if (row > 0) {
+            Cell top = bb[row - 1][col];
+            if (!path.contains(top)) {
+                adj.add(top);
+            }
+        }
         return adj;
     }
 
     public int scoreOf(String word) {
+        if (!trie.contains(word)) {
+            return 0;
+        }
         int length = word.length();
         int score;
         if (length <= 2) {
@@ -133,7 +147,7 @@ public class BoggleSolver {
         } else if (length <= 4) {
             score = 1;
         } else if (length <= 5) {
-            score = 1;
+            score = 2;
         } else if (length <= 6) {
             score = 3;
         } else if (length <= 7) {
@@ -158,21 +172,15 @@ public class BoggleSolver {
             this.col = col;
             this.val = val == 'Q' ? "QU" : String.valueOf(val);
         }
-
-        private String getCode() {
-            return row + "-" + col + "-" + val;
-        }
     }
 
     private class Task {
         private final Cell cell;
-        private final String str;
-        private final Set<String> pointsUsed;
+        private final ArrayList<Cell> path;
 
-        private Task(Cell cell, String str, Set<String> pointsUsed) {
+        private Task(Cell cell, ArrayList<Cell> path) {
             this.cell = cell;
-            this.str = str;
-            this.pointsUsed = pointsUsed;
+            this.path = path;
         }
     }
 }
