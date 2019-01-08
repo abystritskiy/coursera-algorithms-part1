@@ -11,7 +11,7 @@ public class CircularSuffixArray {
         this.str = s;
         suffixes = new Suffix[length()];
         for (int i = 0; i < length(); i++) {
-            suffixes[i] = new Suffix(i);
+            suffixes[i] = new Suffix(str, i);
         }
         Arrays.sort(suffixes);
     }
@@ -25,7 +25,7 @@ public class CircularSuffixArray {
             throw new java.lang.IllegalArgumentException();
         }
 
-        Suffix needle = new Suffix(i);
+        Suffix needle = new Suffix(str, i);
         for (int j = 0; j < length(); j++) {
             Suffix sfx = suffixes[j];
             if (needle.equals(sfx)) {
@@ -37,34 +37,6 @@ public class CircularSuffixArray {
 
     public static void main(String[] args) {
         CircularSuffixArray sfa = new CircularSuffixArray("ABRACADABRA!");
-        System.out.println(sfa.index(11)); // 3
-    }
-
-    private class Suffix implements Comparable<Suffix> {
-        private String str = CircularSuffixArray.this.str;
-        private int shift;
-
-        private char getCharAt(int position) {
-            return str.charAt(((position + shift) % str.length()));
-        }
-
-        private Suffix(int shift) {
-            this.shift = shift;
-        }
-
-        public boolean equals(Suffix that) {
-            return that.shift == this.shift;
-        }
-
-        public int compareTo(Suffix that) {
-            for (int i = 0; i < str.length(); i++) {
-                char thisChar = this.getCharAt(i);
-                char thatChar = that.getCharAt(i);
-                if (thisChar != thatChar) {
-                    return thisChar > thatChar ? 1 : -1;
-                }
-            }
-            return 0;
-        }
+        System.out.println(sfa.index(2)); // 3
     }
 }
