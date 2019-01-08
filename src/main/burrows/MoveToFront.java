@@ -5,7 +5,6 @@ windows
 java -classpath "W:\stuff\Java\percolation\out\production\percolation;W:\stuff\Java\percolation\lib\algs4.jar" MoveToFront - < W:\stuff\Java\percolation\input\burrows\abra.txt | java -classpath "W:\stuff\Java\percolation\out\production\percolation;W:\stuff\Java\percolation\lib\algs4.jar" edu.princeton.cs.algs4.HexDump 16
 java -classpath "W:\stuff\Java\percolation\out\production\percolation;W:\stuff\Java\percolation\lib\algs4.jar" MoveToFront - < W:\stuff\Java\percolation\input\burrows\abra.txt | java -classpath "W:\stuff\Java\percolation\out\production\percolation;W:\stuff\Java\percolation\lib\algs4.jar" MoveToFront +
 
-
 MAC:
 cd /Users/o9834/work/Java/coursera-algorithms-part1/src/main/burrows
 javac -classpath /Users/o9834/work/Java/coursera-algorithms-part1/out/production/coursera-algorithms-part1:/Users/o9834/work/Java/coursera-algorithms-part1/lib/algs4.jar MoveToFront.java
@@ -16,16 +15,17 @@ java -classpath /Users/o9834/work/Java/coursera-algorithms-part1/out/production/
 
 import edu.princeton.cs.algs4.BinaryStdIn;
 import edu.princeton.cs.algs4.BinaryStdOut;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-
 
 public class MoveToFront {
     private final static int RADIX = 256;
     private static int[] charTable;
     private static HashMap<Integer, Integer> charMap;
 
+    /**
+     * Encode input message using move-to-front algorithm
+     */
     public static void encode() {
         ArrayList<Integer> out = new ArrayList<>();
 
@@ -47,10 +47,12 @@ public class MoveToFront {
         for (Integer chr : out) {
             BinaryStdOut.write(chr, Byte.SIZE);
         }
-
         BinaryStdOut.close();
     }
 
+    /**
+     * Decode input message using move-to-front algorithm
+     */
     public static void decode() {
         ArrayList<Character> out = new ArrayList<>();
 
@@ -75,6 +77,9 @@ public class MoveToFront {
         BinaryStdOut.close();
     }
 
+    /**
+     * Utility debug method
+     */
     private static void printMap(int position) {
         for (int j : charTable) {
             System.out.print(j + " ");
@@ -82,6 +87,11 @@ public class MoveToFront {
         System.out.println("\n");
     }
 
+    /**
+     * Rebuild characters map by moving char from
+     * specified position to 0 and shifting all others
+     * to one position right
+     */
     private static void rebuildMapFor(int pos) {
         int found = charTable[pos];
         for (int i = pos - 1; i >= 0; i--) {
@@ -93,6 +103,9 @@ public class MoveToFront {
         charMap.put(found, 0);
     }
 
+    /**
+     * Main method
+     */
     public static void main(String[] args) {
         if (args.length > 0) {
             if (args[0].equals("-")) {
