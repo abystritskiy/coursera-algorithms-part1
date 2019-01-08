@@ -1,29 +1,44 @@
 import edu.princeton.cs.algs4.BinaryStdIn;
 import edu.princeton.cs.algs4.BinaryStdOut;
-import java.util.Arrays;
 
 public class BurrowsWheeler {
-    public static void transform() {
-        StringBuilder sb = new StringBuilder();
-        while (!BinaryStdIn.isEmpty()) {
-            sb.append(BinaryStdIn.readChar());
-        }
-        Suffix[] suffixes = new Suffix[sb.length()];
-        for (int i = 0; i < sb.length(); i++) {
-            suffixes[i] = new Suffix(sb.toString(), i);
-        }
-        Arrays.sort(suffixes);
+    private static final int R = 256;
 
-        CircularSuffixArray csa = new CircularSuffixArray(sb.toString());
+    public static void transform() {
+        String str = BinaryStdIn.readString();
+        CircularSuffixArray csa = new CircularSuffixArray(str);
         BinaryStdOut.write(csa.index(0), Integer.SIZE);
-        for (Suffix sfx: suffixes) {
-            BinaryStdOut.write(sfx.getT(), Byte.SIZE);
+
+        for (int i = 0; i < str.length(); i++) {
+            BinaryStdOut.write(str.charAt((csa.index(i) + str.length() - 1) % str.length()));
         }
         BinaryStdOut.close();
     }
 
     public static void inverseTransform() {
+        int first = BinaryStdIn.readInt();
+        String str = BinaryStdIn.readString();
 
+        int n = str.length();
+        int[] count = new int[R + 1], next = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            count[str.charAt(i) + 1]++;
+        }
+
+        for (int i = 1; i < R + 1; i++) {
+            count[i] += count[i - 1];
+        }
+
+        for (int i = 0; i < n; i++) {
+            next[count[str.charAt(i)]++] = i;
+        }
+
+        for (int i = next[first], c = 0; c < n; i = next[i], c++) {
+            BinaryStdOut.write(str.charAt(i));
+        }
+
+        BinaryStdOut.close();
     }
 
 
